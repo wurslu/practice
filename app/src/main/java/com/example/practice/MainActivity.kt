@@ -44,6 +44,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -79,28 +81,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PracticeApp() {
+fun PracticeApp(
+    viewModel: PetViewModel = viewModel()
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    var petPosts by remember { mutableStateOf<List<PetPost>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(key1 = Unit) {
-        withContext(Dispatchers.IO) {
-            try {
-                petPosts = ApiService.getPost()
-                isLoading = false
-            } catch (e: Exception) {
-//                error = "加载失败: ${e.message}"
-//                isLoading = false
-                println("API 错误: ${e.message}")
-                e.printStackTrace()
-                error = "加载失败: ${e.message}"
-                isLoading = false
-            }
-        }
-    }
+
+    val uiState by viewModel.uiState.collectAsState()
+
     var shouldShowTopBar by remember { mutableStateOf(true) }
     shouldShowTopBar = when (currentRoute) {
         BottomBarItem.Home.route -> true
@@ -134,7 +123,7 @@ fun PracticeApp() {
                 composable(route = BottomBarItem.Home.route) {
                     // 显示加载状态、错误或内容
                     when {
-                        isLoading -> {
+                        uiState.isLoading -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -143,13 +132,13 @@ fun PracticeApp() {
                             }
                         }
 
-                        error != null -> {
+                        uiState.error != null -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = error ?: "",
+                                    text = uiState.error ?: "",
                                     color = MaterialTheme.colorScheme.error,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(16.dp)
@@ -157,9 +146,9 @@ fun PracticeApp() {
                             }
                         }
 
-                        petPosts.isNotEmpty() -> {
+                        uiState.petPost.isNotEmpty() -> {
                             // 如果数据加载成功，显示内容
-                            PracticeContent(petPosts = petPosts)
+                            PracticeContent(petPosts = uiState.petPost)
                         }
 
                         else -> {
@@ -242,7 +231,8 @@ private fun SearchBar(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
-            TextField(value = "",
+            TextField(
+                value = "",
                 onValueChange = {},
                 placeholder = { Text(text = "搜索") },
                 colors = TextFieldDefaults.colors(
