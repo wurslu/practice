@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,8 +66,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.practice.ui.theme.PracticeTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,9 +84,7 @@ fun PracticeApp(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-
     val uiState by viewModel.uiState.collectAsState()
-
     var shouldShowTopBar by remember { mutableStateOf(true) }
     shouldShowTopBar = when (currentRoute) {
         BottomBarItem.Home.route -> true
@@ -121,7 +116,6 @@ fun PracticeApp(
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(route = BottomBarItem.Home.route) {
-                    // 显示加载状态、错误或内容
                     when {
                         uiState.isLoading -> {
                             Box(
@@ -147,12 +141,10 @@ fun PracticeApp(
                         }
 
                         uiState.petPost.isNotEmpty() -> {
-                            // 如果数据加载成功，显示内容
                             PracticeContent(petPosts = uiState.petPost)
                         }
 
                         else -> {
-                            // 如果没有数据但没有错误，则使用示例数据
                             PracticeContent(petPosts = samplePetPostData)
                         }
                     }
