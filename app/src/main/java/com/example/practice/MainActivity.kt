@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +23,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -86,6 +86,7 @@ fun PracticeApp(
     val currentRoute = navBackStackEntry?.destination?.route
     val uiState by viewModel.uiState.collectAsState()
     var shouldShowTopBar by remember { mutableStateOf(true) }
+
     shouldShowTopBar = when (currentRoute) {
         BottomBarItem.Home.route -> true
         BottomBarItem.Profile.route -> false
@@ -96,16 +97,12 @@ fun PracticeApp(
 
     PracticeTheme {
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-            AnimatedVisibility(shouldShowTopBar) {
-                Surface(
-                    shadowElevation = 1.dp,
-                    tonalElevation = 0.dp,
-                    modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)
-                ) {
-                    PracticeTopBar(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                    )
-                }
+            if (shouldShowTopBar) {
+                PracticeTopBar(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 12.dp)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                )
             }
         }, bottomBar = {
             PracticeBottomNavigation(navController = navController, currentRoute = currentRoute)
@@ -189,24 +186,28 @@ fun PracticeBottomNavigation(
 
 @Composable
 fun PracticeTopBar(modifier: Modifier = Modifier) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
+    Surface(
+        shadowElevation = 1.dp, tonalElevation = 0.dp, modifier = Modifier
     ) {
-        Icon(
-            imageVector = Icons.Outlined.MailOutline,
-            contentDescription = "邮件图标",
-            modifier = Modifier.size(28.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        SearchBar()
-        Icon(
-            imageVector = Icons.Default.AccountCircle,
-            contentDescription = "用户中心图标",
-            modifier = Modifier.size(28.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.MailOutline,
+                contentDescription = "邮件图标",
+                modifier = Modifier.size(28.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            SearchBar()
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = "用户中心图标",
+                modifier = Modifier.size(28.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
@@ -246,14 +247,13 @@ private fun SearchBar(modifier: Modifier = Modifier) {
 fun PracticeContent(petPosts: List<PetPost>, modifier: Modifier = Modifier) {
     Surface {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 144.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp),
+            columns = GridCells.Adaptive(minSize = 160.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = PaddingValues(4.dp),
             modifier = modifier
         ) {
-            items(petPosts.size) { index ->
-                val post = petPosts[index]
+            items(petPosts) { post ->
                 PetCard(
                     postDate = post.date,
                     postTitle = post.title,
@@ -278,7 +278,7 @@ fun PetCard(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = modifier.fillMaxSize()
         ) {
             Image(
@@ -287,21 +287,23 @@ fun PetCard(
                 modifier = Modifier
                     .clip(shape = MaterialTheme.shapes.medium)
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .height(220.dp),
                 contentScale = ContentScale.Crop
             )
             Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
                     text = postDate,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
                     text = postTitle,
-                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2,
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth()
@@ -317,16 +319,18 @@ fun PetCard(
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
                             contentDescription = "like count",
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = likeCount.toString(), style = MaterialTheme.typography.bodyLarge
+                            text = likeCount.toString(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = "share",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

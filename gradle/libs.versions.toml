@@ -1,4 +1,5 @@
 [versions]
+accompanistSystemuicontroller = "0.32.0"
 agp = "8.8.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -14,6 +15,7 @@ ktor = "2.3.7"
 slf4jSimple = "2.0.9"
 
 [libraries]
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
