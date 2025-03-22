@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,32 +17,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,7 +50,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -184,62 +182,86 @@ fun PracticeBottomNavigation(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeTopBar(modifier: Modifier = Modifier) {
+
+    var searchText by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+
     Surface(
         shadowElevation = 1.dp, tonalElevation = 0.dp, modifier = Modifier
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.MailOutline,
-                contentDescription = "邮件图标",
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            SearchBar()
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "用户中心图标",
-                modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
+        if (isSearchActive) {
+            SearchBar(
+                query = searchText,
+                onQueryChange = { searchText = it },
+                onSearch = {},
+                active = true,
+                onActiveChange = { isSearchActive = it },
+                placeholder = { Text("搜索") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "搜索"
+                    )
+                },
+                trailingIcon = {
+                    Icon(imageVector = Icons.Default.Close,
+                        contentDescription = "关闭",
+                        modifier = Modifier.clickable {
+                            isSearchActive = false
+                        })
+                },
+                modifier = Modifier,
+            ) {
+                val searchAdvice = "搜索建议"
+                ListItem(
+                    headlineContent = { Text(searchAdvice) },
+                    modifier = Modifier.clickable {
+                        searchText = searchAdvice
+                        isSearchActive = false
+                    }
+                )
+            }
+        } else {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.MailOutline,
+                    contentDescription = "邮件图标",
+                    modifier = Modifier.weight(0.1f),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                SearchBar(
+                    query = searchText,
+                    onQueryChange = { searchText = it },
+                    onSearch = {},
+                    active = isSearchActive,
+                    onActiveChange = { isSearchActive = it },
+                    placeholder = { Text("搜索") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "搜索"
+                        )
+                    },
+                    modifier = Modifier.weight(0.8f),
+                ) {
 
-@Composable
-private fun SearchBar(modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.wrapContentWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            TextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text(text = "搜索") },
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                modifier = Modifier.widthIn(max = 200.dp)
-            )
-            Image(
-                imageVector = Icons.Default.Search, contentDescription = "search"
-            )
+                }
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "用户中心图标",
+                    modifier = Modifier.weight(0.1f),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
+
     }
 }
 
@@ -273,66 +295,60 @@ fun PetCard(
     @DrawableRes petImage: Int,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        shadowElevation = 1.dp, tonalElevation = 1.dp, shape = MaterialTheme.shapes.medium
+    Card(
+        shape = MaterialTheme.shapes.medium,
+        modifier = modifier
     ) {
+        Image(
+            painter = painterResource(petImage),
+            contentDescription = null,
+            modifier = Modifier
+                .clip(shape = MaterialTheme.shapes.medium)
+                .fillMaxWidth()
+                .height(220.dp),
+            contentScale = ContentScale.Crop
+        )
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = modifier.fillMaxSize()
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Image(
-                painter = painterResource(petImage),
-                contentDescription = null,
-                modifier = Modifier
-                    .clip(shape = MaterialTheme.shapes.medium)
-                    .fillMaxWidth()
-                    .height(220.dp),
-                contentScale = ContentScale.Crop
+            Text(
+                text = postDate,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
             )
-            Column(
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            Text(
+                text = postTitle,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                minLines = 2,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = postDate,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = postTitle,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
-                    minLines = 2,
-                    modifier = Modifier.fillMaxWidth()
-                )
                 Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "like count",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = likeCount.toString(),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
                     Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "share",
-                        tint = MaterialTheme.colorScheme.onSurface
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "like count",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = likeCount.toString(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "share",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
