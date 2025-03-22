@@ -196,7 +196,7 @@ fun PracticeTopBar(modifier: Modifier = Modifier) {
             SearchBar(
                 query = searchText,
                 onQueryChange = { searchText = it },
-                onSearch = {},
+                onSearch = { isSearchActive = false },
                 active = true,
                 onActiveChange = { isSearchActive = it },
                 placeholder = { Text("搜索") },
@@ -210,6 +210,9 @@ fun PracticeTopBar(modifier: Modifier = Modifier) {
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "关闭",
                         modifier = Modifier.clickable {
+                            if (searchText.isNotEmpty()) {
+                                searchText = ""
+                            }
                             isSearchActive = false
                         })
                 },
