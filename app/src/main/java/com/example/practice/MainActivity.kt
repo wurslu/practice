@@ -1,5 +1,6 @@
 package com.example.practice
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -51,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -237,7 +239,7 @@ fun PracticeTopBar(modifier: Modifier = Modifier) {
                     imageVector = Icons.Outlined.MailOutline,
                     contentDescription = "邮件图标",
                     modifier = Modifier.weight(0.1f),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
                 SearchBar(
                     query = searchText,
@@ -260,7 +262,7 @@ fun PracticeTopBar(modifier: Modifier = Modifier) {
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "用户中心图标",
                     modifier = Modifier.weight(0.1f),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -270,6 +272,8 @@ fun PracticeTopBar(modifier: Modifier = Modifier) {
 
 @Composable
 fun PracticeContent(petPosts: List<PetPost>, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
     Surface {
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 160.dp),
@@ -283,7 +287,16 @@ fun PracticeContent(petPosts: List<PetPost>, modifier: Modifier = Modifier) {
                     postDate = post.date,
                     postTitle = post.title,
                     petImage = post.petImage,
-                    likeCount = post.likeCount
+                    likeCount = post.likeCount,
+                    onShareClick = {
+                        val shareText = "https://android-studio.s3.bitiful.net/017-practice-v1.9.7.apk"
+                        val shareIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "复制链接到浏览器下载App查看"))
+                    }
                 )
             }
         }
@@ -296,6 +309,7 @@ fun PetCard(
     postTitle: String,
     likeCount: Int,
     @DrawableRes petImage: Int,
+    onShareClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -350,7 +364,10 @@ fun PetCard(
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = "share",
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.clickable {
+                        onShareClick()
+                    }
                 )
             }
         }
